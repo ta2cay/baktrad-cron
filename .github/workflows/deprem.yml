@@ -1,0 +1,22 @@
+name: BAKTRAD Deprem Kontrol
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  deprem-kontrol:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deprem API Cagir
+        run: |
+          response=$(curl -s -w "\n%{http_code}" "https://baktrad.org.tr/api/cron_deprem.php?key=baktrad2026deprem")
+          http_code=$(echo "$response" | tail -1)
+          body=$(echo "$response" | head -1)
+          echo "HTTP: $http_code"
+          echo "Yanit: $body"
+          if [ "$http_code" != "200" ]; then
+            echo "HATA: Sunucu $http_code dondu"
+            exit 1
+          fi
